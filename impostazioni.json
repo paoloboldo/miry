@@ -1,0 +1,110 @@
+{
+  "dipendenti": [
+    {
+      "nome": "Aldo",
+      "colore": "800080",
+      "orarioSettimanale": [
+        {
+          "lun": [
+            { "inizio": "08:00", "fine": "12:00" },
+            { "inizio": "14:00", "fine": "18:00" }
+          ]
+        },
+        {
+          "mar": [
+            { "inizio": "08:00", "fine": "12:00" },
+            { "inizio": "14:00", "fine": "18:00" }
+          ]
+        },
+        {
+          "mer": [
+            { "inizio": "08:00", "fine": "12:00" },
+            { "inizio": "14:00", "fine": "18:00" }
+          ]
+        },
+        {
+          "gio": [
+            { "inizio": "08:00", "fine": "12:00" },
+            { "inizio": "14:00", "fine": "18:00" }
+          ]
+        },
+        {
+          "ven": [
+            { "inizio": "08:00", "fine": "12:00" },
+            { "inizio": "14:00", "fine": "18:00" }
+          ]
+        },
+        {
+          "sab": [{ "inizio": "08:00", "fine": "12:00" }]
+        },
+        {
+          "dom": []
+        }
+      ]
+    },
+    {
+      "nome": "Betta",
+      "colore": "FF00FF",
+      "orarioSettimanale": [
+        {
+          "lun": [],
+          "mar": [],
+          "mer": [],
+          "gio": [],
+          "ven": [],
+          "sab": [],
+          "dom": []
+        }
+      ]
+    },
+    {
+      "nome": "Carlo",
+      "colore": "00FF00",
+      "orarioSettimanale": [
+        {
+          "lun": [],
+          "mar": [],
+          "mer": [],
+          "gio": [],
+          "ven": [],
+          "sab": [],
+          "dom": []
+        }
+      ]
+    },
+    {
+      "nome": "Dario",
+      "colore": "00FFFF",
+      "orarioSettimanale": [
+        {
+          "lun": [],
+          "mar": [],
+          "mer": [],
+          "gio": [],
+          "ven": [],
+          "sab": [],
+          "dom": []
+        }
+      ]
+    }
+  ],
+  "settimana": ["lun", "mar", "mer", "gio", "ven", "sab", "dom"],
+  "tipiDiOre": {
+    "L": {
+      "nome": "Ore di lavoro",
+      "colore": "00FF00"
+    },
+    "P": {
+      "nome": "Ore di pausa",
+      "colore": "FFFF00"
+    },
+    "M": {
+      "nome": "Ore di malattia",
+      "colore": "FF0000"
+    },
+    "F": {
+      "nome": "Ore di ferie",
+      "colore": "0000FF"
+    }
+  }
+}
