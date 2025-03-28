@@ -5,15 +5,15 @@ from openpyxl.utils import get_column_letter
 import datetime
 
 def get_week_days(num_settimana, anno):
+    import datetime
     # Definisco l'ordine dei giorni della settimana
     giorni = ["LUN", "MAR", "MER", "GIO", "VEN", "SAB", "DOM"]
-
-    # Ottengo il lunedì della settimana ISO data usando fromisocalendar
+    
+    # Ottengo il lunedì della settimana ISO (anche se la data potrebbe appartenere all'anno precedente)
     lunedi = datetime.date.fromisocalendar(anno, num_settimana, 1)
-
-    # Creo il dizionario associando ad ogni giorno il numero del mese corrispondente
-    giorni_mese = {giorni[i]: (lunedi + datetime.timedelta(days=i)).month for i in range(7)}
-    print(giorni_mese)
+    
+    # Creo il dizionario: per ogni giorno della settimana, prendo il giorno del mese (day)
+    giorni_mese = {giorni[i]: (lunedi + datetime.timedelta(days=i)).day for i in range(7)}
     
     return giorni_mese
 
@@ -26,14 +26,10 @@ def crea_settimanale(num_settimana=23, anno=2025):
     dipendenti = settings["dipendenti"]
     
     # Giorni da visualizzare nelle intestazioni (in ordine)
-    giorni = ["LUN", "MAR", "MER", "GIO", "VEN", "SAB"]
+    giorni = ["LUN", "MAR", "MER", "GIO", "VEN", "SAB", "DOM"]
 
-    # Prendo il numero del mese corrispondente ai giorni della settimana della settimana num_settimana dell'anno anno
-    # e creo un dizionario con i nomi dei giorni della settimana e il relativo numero del mese
-    # (es. {"LUN": 2, "MAR": 3, "MER": 4, "GIO": 5, "VEN": 6, "SAB": 7})
-    giorni_mese = {giorni[i]: (num_settimana - 1) // 4 + 1 for i in range(len(giorni))}
-    
-    print(giorni_mese)
+    # Prendo il giorno del mese per ogni giorno della settimana
+    giorni_mese = get_week_days(num_settimana, anno)
     
     # Crea una nuova cartella Excel e seleziona il foglio attivo
     wb = openpyxl.Workbook()
@@ -48,12 +44,12 @@ def crea_settimanale(num_settimana=23, anno=2025):
         bottom=Side(border_style="thin", color="000000")
     )
     
-    # 1) Colonna A: etichetta "ORARIO" in verticale su righe 1-3
+    # 1) Colonna A: etichetta "ORARIO" su righe 1-3
     ws.merge_cells("A1:A3")
     cell_orario = ws["A1"]
     cell_orario.value = "ORARIO"
     cell_orario.alignment = Alignment(
-        horizontal="center", vertical="center", textRotation=90
+        horizontal="center", vertical="center"
     )
     # Ad esempio sfondo rosso e testo bianco, per imitare l'immagine
     cell_orario.fill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")
@@ -75,18 +71,21 @@ def crea_settimanale(num_settimana=23, anno=2025):
         current += delta
     
     # 3) Struttura delle colonne per i giorni
-    #    Ogni giorno occupa 3 colonne: 
+    #    Ogni giorno occupa tante colonne quanti sono i dipendenti in impostazioni.json "dipendenti"[]
     #    Giorno 1 -> colonne B, C, D  (start_col=2, end_col=4)
     #    Giorno 2 -> colonne E, F, G  (start_col=5, end_col=7)
     #    ...
-    #    In generale: day i (1-based) -> start_col = 2 + 3*(i-1), end_col = start_col + 2
+    #    In generale: day i (1-based) -> start_col = 2 + num_dipendenti*(i-1), end_col = start_col + num_dipendenti - 1
+    num_dipendenti = len(dipendenti)
+
     
-    for i in range(7):
-        day_num = i + 1        # Da 1 a 7
+    for i in range(7): # includiamo la domenica (0..6)
+        # i = 0 -> LUN, i = 1 -> MAR, ..., i = 6 -> DOM
         day_name = giorni[i]   # LUN, MAR, ...
+        day_num = giorni_mese[day_name]
         
-        start_col = 2 + 3*i
-        end_col = start_col + 2
+        start_col = 2 + num_dipendenti*i
+        end_col = start_col + num_dipendenti - 1  # Adjusted to use num_dipendenti
         
         # Riga 1: celle unite con il numero del giorno
         ws.merge_cells(
@@ -109,23 +108,27 @@ def crea_settimanale(num_settimana=23, anno=2025):
         cell_day_name.alignment = Alignment(horizontal="center", vertical="center")
         cell_day_name.font = Font(bold=True)
         
-        # Riga 3: celle unite per il (futuro) nome dipendente
-        ws.merge_cells(
-            start_row=3, start_column=start_col,
-            end_row=3, end_column=end_col
-        )
-        cell_emp = ws.cell(row=3, column=start_col)
-        cell_emp.alignment = Alignment(horizontal="center", vertical="center")
-        
         # Colore di sfondo azzurrino per i giorni pari
         if day_num % 2 == 0:
             fill_color = PatternFill(start_color="CCFFFF", end_color="CCFFFF", fill_type="solid")
+            # Imposta il colore del testo a nero
+            day_num_color = "000000"
+            day_name_color = "000000"
         else:
             fill_color = None
+            # Imposta il colore del testo a rosso
+            day_num_color = "FF0000"
+            day_name_color = "FF0000"
+
+        # Applica il colore del testo e il grassetto al numero del giorno
+        cell_day_num.font = Font(color=day_num_color, bold=True)
+
+        # Applica il colore del testo e il grassetto al nome del giorno
+        cell_day_name.font = Font(color=day_name_color, bold=True)
         
         # Applica il bordo e l’eventuale sfondo a tutte le righe interessate (1..30) in queste colonne
         for r in range(1, 31):
-            for c in range(start_col, end_col + 1):
+            for c in range(start_col, end_col + 1):  # Adjusted to use num_dipendenti
                 cell = ws.cell(row=r, column=c)
                 cell.border = thin_border
                 # Se vuoi colorare anche intestazioni (riga 1 e 2), togli la condizione (r >= 4)
@@ -133,25 +136,25 @@ def crea_settimanale(num_settimana=23, anno=2025):
                     cell.fill = fill_color
         
         # Imposta larghezza delle colonne
-        for c in range(start_col, end_col + 1):
+        for c in range(start_col, end_col + 1):  # Adjusted to use num_dipendenti
             ws.column_dimensions[get_column_letter(c)].width = 5
     
-    # 4) Inserisci i nomi dei dipendenti in riga 3 (uno per giorno), colorando la cella col colore indicato
-    #    Se ci sono più di 7 dipendenti, i restanti non verranno inseriti
-    for i, dip in enumerate(dipendenti):
-        if i >= 7:
-            break
-        day_num = i + 1
-        start_col = 2 + 3*i
-        
-        cell_emp = ws.cell(row=3, column=start_col)
-        cell_emp.value = dip["nome"]
-        
-        # Applica il colore di sfondo definito nel JSON (campo "colore")
-        color_code = dip.get("colore", None)
-        if color_code:
-            fill = PatternFill(start_color=color_code, end_color=color_code, fill_type="solid")
-            cell_emp.fill = fill
+    # 4) Inserisci i nomi dei dipendenti, uno per colonna per ogni giorno
+    for i in range(7):  # Per ogni giorno della settimana
+        day_name = giorni[i]
+        start_col = 2 + num_dipendenti * i  # Adjusted to use num_dipendenti
+
+        for j, dip in enumerate(dipendenti):  # Per ogni dipendente
+            col = start_col + j
+            cell_emp = ws.cell(row=3, column=col)  # Modificato a riga 3
+            cell_emp.value = dip["nome"]
+            cell_emp.alignment = Alignment(horizontal="center", vertical="center")
+
+            # Applica il colore di sfondo definito nel JSON (campo "colore")
+            color_code = dip.get("colore", None)
+            if color_code:
+                fill = PatternFill(start_color=color_code, end_color=color_code, fill_type="solid")
+                cell_emp.fill = fill
     
     # 5) Applica i bordi anche alla colonna A (orari)
     for r in range(1, 31):
@@ -159,7 +162,7 @@ def crea_settimanale(num_settimana=23, anno=2025):
         cell.border = thin_border
     
     # (Facoltativo) Se vuoi un'ulteriore riga di "chiusura" (riga 31) con bordi
-    max_col = 1 + 3*7  # colonna A + 7 blocchi da 3 colonne ciascuno
+    max_col = 1 + num_dipendenti * 7  # Adjusted to use num_dipendenti
     for c in range(1, max_col + 1):
         cell = ws.cell(row=31, column=c)
         cell.border = thin_border
@@ -168,6 +171,4 @@ def crea_settimanale(num_settimana=23, anno=2025):
     wb.save("Sett1.xlsx")
 
 if __name__ == "__main__":
-    # crea_settimanale()
-    giorni_mese = get_week_days(1, 2025)
-    print(giorni_mese)
+    crea_settimanale()
