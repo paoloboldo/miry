@@ -17,8 +17,16 @@ def get_week_days(num_settimana, anno):
     
     return giorni_mese
 
+def crea_mensile(mese=6, anno=2025):
+    # il file si chiamerè "TURNI MESE AAAA.xlsx" dove AAAA è l'anno e MESE è il mese scritto in italiano in maiuscolo per esteso
+    # ad esempio "TURNI GIUGNO 2025.xlsx" per il mese di Giugno 2025
+    # conterrà un foglio per ogni settimana (con la numerazione ISO8601) in quel mese
+    # quindi alcuni mesi avranno 4 fogli (raro) e altri 5 (comune) e alcuni 6 (raro)
+    # il nome dei fogli sarà "Sett" + il numero della settimana nell'anno (1..53)
+    pass
 
-def crea_settimanale(num_settimana=23, anno=2025):
+
+def crea_settimanale(settimana=23, anno=2025):
 
     # Carica i dati dal file impostazioni.json
     with open("impostazioni.json", "r") as f:
@@ -29,12 +37,12 @@ def crea_settimanale(num_settimana=23, anno=2025):
     giorni = ["LUN", "MAR", "MER", "GIO", "VEN", "SAB", "DOM"]
 
     # Prendo il giorno del mese per ogni giorno della settimana
-    giorni_mese = get_week_days(num_settimana, anno)
+    giorni_mese = get_week_days(settimana, anno)
     
     # Crea una nuova cartella Excel e seleziona il foglio attivo
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "Sett1"
+    ws.title = "Sett"+str(settimana)
     
     # Imposta un bordo sottile da applicare alle celle
     thin_border = Border(
@@ -44,8 +52,8 @@ def crea_settimanale(num_settimana=23, anno=2025):
         bottom=Side(border_style="thin", color="000000")
     )
     
-    # 1) Colonna A: etichetta "ORARIO" su righe 1-3
-    ws.merge_cells("A1:A3")
+    # 1) Colonna A: etichetta "ORARIO" su righe 1-2
+    ws.merge_cells("A1:A2")
     cell_orario = ws["A1"]
     cell_orario.value = "ORARIO"
     cell_orario.alignment = Alignment(
@@ -58,13 +66,24 @@ def crea_settimanale(num_settimana=23, anno=2025):
     # Imposta larghezza colonna A
     ws.column_dimensions["A"].width = 8
     
-    # 2) Inserisci gli orari (7:30 -> 20:30 ogni 30 min) in colonna A dalla riga 4 in poi
-    start_time = datetime.datetime(2023, 1, 1, 7, 30)
-    end_time = datetime.datetime(2023, 1, 1, 20, 30)
+    # 2) Inserisci gli orari (8:00 -> 20:00 ogni 30 min) in colonna A dalla riga 5 in poi
+    start_time = datetime.datetime(2023, 1, 1, 8, 0)  # Changed start time to 8:00
+    end_time = datetime.datetime(2023, 1, 1, 20, 0)  # Changed end time to 20:00
     delta = datetime.timedelta(minutes=30)
     
+    # Calcola il numero di time slots
+    time_slots = 0
     current = start_time
-    row_idx = 4
+    while current <= end_time:
+        time_slots += 1
+        current += delta
+    
+    # Calcoliamo la riga finale in base al numero di orari
+    first_time_row = 5
+    last_time_row = first_time_row + time_slots - 1
+    
+    current = start_time
+    row_idx = first_time_row
     while current <= end_time:
         ws.cell(row=row_idx, column=1).value = current.strftime("%H:%M")
         row_idx += 1
@@ -77,7 +96,9 @@ def crea_settimanale(num_settimana=23, anno=2025):
     #    ...
     #    In generale: day i (1-based) -> start_col = 2 + num_dipendenti*(i-1), end_col = start_col + num_dipendenti - 1
     num_dipendenti = len(dipendenti)
-
+    
+    # Calculate max_col here before using it
+    max_col = 1 + num_dipendenti * 7  # colonna A + 7 blocchi da num_dipendenti colonne ciascuno
     
     for i in range(7): # includiamo la domenica (0..6)
         # i = 0 -> LUN, i = 1 -> MAR, ..., i = 6 -> DOM
@@ -127,17 +148,20 @@ def crea_settimanale(num_settimana=23, anno=2025):
         cell_day_name.font = Font(color=day_name_color, bold=True)
         
         # Applica il bordo e l’eventuale sfondo a tutte le righe interessate (1..30) in queste colonne
-        for r in range(1, 31):
+        for r in range(1, last_time_row + 1):
             for c in range(start_col, end_col + 1):  # Adjusted to use num_dipendenti
                 cell = ws.cell(row=r, column=c)
                 cell.border = thin_border
-                # Se vuoi colorare anche intestazioni (riga 1 e 2), togli la condizione (r >= 4)
-                if fill_color and r >= 4:
+                # Non applicare i bordi alla riga vuota (4) tranne sotto
+                if r == 4:
+                    cell.border = Border(bottom=Side(border_style="thin", color="000000"))
+                # Se vuoi colorare anche intestazioni (riga 1 e 2), togli la condizione (r >= 5)
+                if fill_color and r >= 5:
                     cell.fill = fill_color
         
         # Imposta larghezza delle colonne
         for c in range(start_col, end_col + 1):  # Adjusted to use num_dipendenti
-            ws.column_dimensions[get_column_letter(c)].width = 5
+            ws.column_dimensions[get_column_letter(c)].width = 6
     
     # 4) Inserisci i nomi dei dipendenti, uno per colonna per ogni giorno
     for i in range(7):  # Per ogni giorno della settimana
@@ -156,16 +180,24 @@ def crea_settimanale(num_settimana=23, anno=2025):
                 fill = PatternFill(start_color=color_code, end_color=color_code, fill_type="solid")
                 cell_emp.fill = fill
     
-    # 5) Applica i bordi anche alla colonna A (orari)
-    for r in range(1, 31):
-        cell = ws.cell(row=r, column=1)
-        cell.border = thin_border
+    # Aggiungi una riga vuota tra i nomi dei dipendenti e gli orari (solo bordo inferiore)
+    for c in range(1, max_col + 1):  # Now max_col is defined
+        ws.cell(row=4, column=c).border = Border(bottom=Side(border_style="thin", color="000000"))
+        ws.cell(row=4, column=c).value = None  # Clear row 4
     
-    # (Facoltativo) Se vuoi un'ulteriore riga di "chiusura" (riga 31) con bordi
-    max_col = 1 + num_dipendenti * 7  # Adjusted to use num_dipendenti
+    # 5) Applica i bordi anche alla colonna A (orari)
+    for r in range(1, last_time_row + 1):
+        cell = ws.cell(row=r, column=1)
+        # Per la riga 4 (riga vuota) applica solo il bordo inferiore
+        if r == 4:
+            cell.border = Border(bottom=Side(border_style="thin", color="000000"))
+        else:
+            cell.border = thin_border
+    
+    # Se vuoi un'ulteriore riga di "chiusura" con bordi
     for c in range(1, max_col + 1):
-        cell = ws.cell(row=31, column=c)
-        cell.border = thin_border
+        cell = ws.cell(row=last_time_row + 1, column=c)
+        cell.border = Border(top=Side(border_style="thin", color="000000"))
     
     # Salva il file risultante
     wb.save("Sett1.xlsx")
