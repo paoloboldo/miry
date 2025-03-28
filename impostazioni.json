@@ -1,50 +1,79 @@
 {
   "dipendenti": [
     {
-      "nome": "Aldo",
-      "colore": "800080",
+      "nome": "MIRIAM",
+      "colore": "FFB347",
       "orarioSettimanale": [
         {
-          "lun": [
-            { "inizio": "08:00", "fine": "12:00" },
-            { "inizio": "14:00", "fine": "18:00" }
+          "LUN": [
+            { "inizio": "13:00", "fine": "19:30" }
           ]
         },
         {
-          "mar": [
-            { "inizio": "08:00", "fine": "12:00" },
-            { "inizio": "14:00", "fine": "18:00" }
+          "MAR": [
+            { "inizio": "08:00", "fine": "14:30" }
           ]
         },
         {
-          "mer": [
-            { "inizio": "08:00", "fine": "12:00" },
-            { "inizio": "14:00", "fine": "18:00" }
+          "MER": [
+            { "inizio": "13:00", "fine": "19:30" }
           ]
         },
         {
-          "gio": [
-            { "inizio": "08:00", "fine": "12:00" },
-            { "inizio": "14:00", "fine": "18:00" }
+          "GIO": [
+            { "inizio": "08:00", "fine": "14:30" }
           ]
         },
         {
-          "ven": [
-            { "inizio": "08:00", "fine": "12:00" },
-            { "inizio": "14:00", "fine": "18:00" }
+          "VEN": [
+            { "inizio": "08:00", "fine": "12:30" },
+            { "inizio": "15:30", "fine": "19:30" }
           ]
         },
         {
-          "sab": [{ "inizio": "08:00", "fine": "12:00" }]
-        },
-        {
-          "dom": []
+          "SAB": [{ "inizio": "13:30", "fine": "19:30" }]
         }
       ]
     },
     {
-      "nome": "Betta",
-      "colore": "FF00FF",
+      "nome": "ANNA",
+      "colore": "77DD77",
+      "orarioSettimanale": [
+        {
+          "LUN": [
+            { "inizio": "08:00", "fine": "12:30" },
+            { "inizio": "15:30", "fine": "19:30" }
+          ],
+        {
+          "MAR": [
+            { "inizio": "08:00", "fine": "14:30" }
+          ]
+        },
+        {
+          "MER": [
+            { "inizio": "13:00", "fine": "19:30" }
+          ]
+        },
+        {
+          "GIO": [
+            { "inizio": "08:00", "fine": "14:30" }
+          ]
+        },
+        {
+          "VEN": [
+            { "inizio": "08:00", "fine": "12:30" },
+            { "inizio": "15:30", "fine": "19:30" }
+          ]
+        },
+        {
+          "SAB": [{ "inizio": "13:30", "fine": "19:30" }]
+        },
+        }
+      ]
+    },
+    {
+      "nome": "LUISA",
+      "colore": "A7C7E7",
       "orarioSettimanale": [
         {
           "lun": [],
@@ -58,23 +87,8 @@
       ]
     },
     {
-      "nome": "Carlo",
-      "colore": "00FF00",
-      "orarioSettimanale": [
-        {
-          "lun": [],
-          "mar": [],
-          "mer": [],
-          "gio": [],
-          "ven": [],
-          "sab": [],
-          "dom": []
-        }
-      ]
-    },
-    {
-      "nome": "Dario",
-      "colore": "00FFFF",
+      "nome": "FEDERICA",
+      "colore": "FAF884",
       "orarioSettimanale": [
         {
           "lun": [],
@@ -88,23 +102,27 @@
       ]
     }
   ],
-  "settimana": ["lun", "mar", "mer", "gio", "ven", "sab", "dom"],
+  "settimana": ["LUN", "MAR", "MER", "GIO", "VEN", "SAB", "DOM"],
   "tipiDiOre": {
     "L": {
-      "nome": "Ore di lavoro",
-      "colore": "00FF00"
+      "nome": "lavoro",
+      "colore": ""
+    },
+    "C": {
+      "nome": "corso",
+      "colore": "FFA500"
     },
     "P": {
-      "nome": "Ore di pausa",
-      "colore": "FFFF00"
-    },
-    "M": {
-      "nome": "Ore di malattia",
+      "nome": "permesso/ferie",
       "colore": "FF0000"
     },
-    "F": {
-      "nome": "Ore di ferie",
-      "colore": "0000FF"
+    "M": {
+      "nome": "mutua",
+      "colore": "FF0000"
+    },
+    "R": {
+      "nome": "riposo/festività",
+      "colore": "FF0000"
     }
   }
 }
