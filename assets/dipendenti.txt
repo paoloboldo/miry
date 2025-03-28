@@ -1,4 +1,0 @@
-Aldo, 800080
-Betta, FF00FF
-Carlo, 00FF00
-Dario, 00FFFF
